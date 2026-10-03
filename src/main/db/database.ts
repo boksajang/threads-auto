@@ -319,6 +319,11 @@ const migrations = [
     ON affiliate_performance_by_key(credential_fingerprint,performance_date);
   `,
   `ALTER TABLE accounts ADD COLUMN threads_token_check_failed_at TEXT;`,
+  `CREATE TABLE comment_parent_posts (
+    account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    post_id TEXT NOT NULL, body TEXT NOT NULL, permalink TEXT, published_at TEXT,
+    PRIMARY KEY(account_id,post_id)
+  );`,
 ];
 
 export class AppDatabase {

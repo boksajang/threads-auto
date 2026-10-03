@@ -17,7 +17,7 @@ export interface ThreadsTokenRefreshResult {
   expiresAt: string;
   tokenChanged: boolean;
 }
-export interface RemoteComment { id: string; postId: string; text: string; createdAt: string; username?: string }
+export interface RemoteComment { parent?: ThreadsPostSummary; id: string; postId: string; text: string; createdAt: string; username?: string }
 export interface InsightValues { views?: number; likes?: number; replies?: number; reposts?: number; quotes?: number; shares?: number }
 
 export class UncertainRemoteOperationError extends Error {

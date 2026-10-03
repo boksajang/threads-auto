@@ -115,6 +115,7 @@ export type CommentDecision = 'PENDING' | 'REPLIED' | 'SKIPPED' | 'REPLY_UNCERTA
 export type CommentReplyStatus = 'NONE' | 'PUBLISHED' | 'UNCERTAIN' | 'DELETED' | 'DELETE_FAILED';
 
 export interface CommentRecord {
+  postPermalink?:string;
   postBody?:string;
   postPublishedAt?:string;
   id:string;
@@ -190,7 +191,7 @@ export interface ThreadsIntegrationEventRecord {
 
 function commentFromRow(row:any):CommentRecord {
   return {
-    postBody:row.post_body??undefined,postPublishedAt:row.post_published_at??undefined,
+    postBody:row.post_body??undefined,postPublishedAt:row.post_published_at??undefined,postPermalink:row.post_permalink??undefined,
     id:row.id, accountId:row.account_id, postId:row.post_id, body:row.body,
     authorUsername:row.author_username, commentedAt:row.commented_at ?? undefined,
     decision:row.decision, decisionReason:row.decision_reason ?? undefined,
@@ -1240,6 +1241,14 @@ export class Repositories {
     return row ? commentFromRow(row) : undefined;
   }
 
+  saveCommentParent(input:{accountId:string;postId:string;body:string;permalink?:string;publishedAt?:string}):void {
+    this.db.raw.prepare(`INSERT INTO comment_parent_posts(account_id,post_id,body,permalink,published_at) VALUES(?,?,?,?,?)
+      ON CONFLICT(account_id,post_id) DO UPDATE SET body=excluded.body,
+      permalink=COALESCE(excluded.permalink,comment_parent_posts.permalink),
+      published_at=COALESCE(excluded.published_at,comment_parent_posts.published_at)`)
+      .run(input.accountId,input.postId,input.body,input.permalink??null,input.publishedAt??null);
+  }
+
   listComments(input:CommentListInput):CommentRecord[] {
     const limit=Math.max(1,Math.min(input.limit ?? 50,200));
     const clauses=['account_id=@accountId'];
@@ -1248,7 +1257,7 @@ export class Repositories {
     if (input.decision) { clauses.push('decision=@decision'); values.decision=input.decision; }
     if (input.replyStatus) { clauses.push('reply_status=@replyStatus'); values.replyStatus=input.replyStatus; }
     if (input.beforeUpdatedAt) { clauses.push('updated_at<@beforeUpdatedAt'); values.beforeUpdatedAt=input.beforeUpdatedAt; }
-    return this.db.raw.prepare(`SELECT comments.*,(SELECT p.body FROM posts p WHERE p.account_id=comments.account_id AND p.threads_post_id=comments.post_id) post_body,(SELECT p.published_at FROM posts p WHERE p.account_id=comments.account_id AND p.threads_post_id=comments.post_id) post_published_at FROM comments WHERE ${clauses.join(' AND ')}
+    return this.db.raw.prepare(`SELECT comments.*,COALESCE((SELECT p.body FROM posts p WHERE p.account_id=comments.account_id AND p.threads_post_id=comments.post_id),(SELECT c.body FROM comment_parent_posts c WHERE c.account_id=comments.account_id AND c.post_id=comments.post_id)) post_body,COALESCE((SELECT p.published_at FROM posts p WHERE p.account_id=comments.account_id AND p.threads_post_id=comments.post_id),(SELECT c.published_at FROM comment_parent_posts c WHERE c.account_id=comments.account_id AND c.post_id=comments.post_id)) post_published_at,(SELECT c.permalink FROM comment_parent_posts c WHERE c.account_id=comments.account_id AND c.post_id=comments.post_id) post_permalink FROM comments WHERE ${clauses.join(' AND ')}
       ORDER BY updated_at DESC,id DESC LIMIT @limit`).all(values).map(commentFromRow);
   }
 

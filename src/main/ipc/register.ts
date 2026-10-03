@@ -1,3 +1,4 @@
+import { CommentContextService } from '../services/comment-context';
 import { app, ipcMain, shell, type BrowserWindow, type IpcMainInvokeEvent } from 'electron';
 import { z } from 'zod';
 import path from 'node:path';
@@ -50,6 +51,7 @@ export function registerIpc(deps: Dependencies): void {
   const candidateCache = new Map<string, SourceCandidate[]>();
   const coupangProductCache = new Map<string, SourceCandidate[]>();
   const threadsAccounts = deps.threadsAccounts;
+  const commentContext=new CommentContextService(deps.repositories,deps.threads);
   const assertThreadsPublishReady = async (accountId: string): Promise<void> => {
     await deps.eligibility.assertAccountReady(accountId);
     const tokenStatus = await threadsAccounts.tokenStatus(accountId);
@@ -541,9 +543,7 @@ export function registerIpc(deps: Dependencies): void {
     if(!post||post.accountId!==accountId)throw new Error('이 계정의 게시 이력을 찾을 수 없습니다.');
     return post;
   });
-  handle('comments:list', commentListSchema, ({ accountId, limit, postId }) => ({
-    summary:deps.repositories.commentSummary(accountId,postId), items:deps.repositories.listComments({accountId,limit,postId}),
-  }));
+  handle('comments:list', commentListSchema, input => commentContext.list(input,!deps.safeUiTestMode));
   handle('threads-integration:list', threadsIntegrationListSchema, ({ accountId, limit }) => deps.threadsIntegration.list(accountId,limit));
   handle('threads-integration:get', threadsIntegrationRunSchema, ({ runId }) => deps.threadsIntegration.get(runId));
   handle('threads-integration:recover', threadsIntegrationRunSchema, ({ runId }) => deps.threadsIntegration.recover(runId));

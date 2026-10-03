@@ -394,11 +394,11 @@ export class MetaThreadsProvider implements ThreadsProvider {
     const me = await this.request('/me?fields=id,username', token);
     const results: RemoteComment[] = [];
     // 댓글 주기마다 과거 게시물 페이지 전체를 순회하지 않고 최신 50개만 확인한다.
-    const data = await this.request('/me/threads?fields=id,replies{id,text,timestamp,username}&limit=50', token);
+    const data = await this.request('/me/threads?fields=id,text,permalink,timestamp,replies{id,text,timestamp,username}&limit=50', token);
     for (const post of data.data ?? []) {
       let replies = post.replies;
       for (let replyPage = 0; replyPage < 5 && replies; replyPage++) {
-        results.push(...(replies.data ?? []).filter((reply: any) => reply.username !== me.username).map((reply: any) => ({ id: reply.id, postId: post.id, text: reply.text ?? '', createdAt: reply.timestamp, username:reply.username })));
+        results.push(...(replies.data ?? []).filter((reply: any) => reply.username !== me.username).map((reply: any) => ({ id: reply.id, postId: post.id, parent:postSummary(post), text: reply.text ?? '', createdAt: reply.timestamp, username:reply.username })));
         replies = replies.paging?.next ? await this.request(replies.paging.next, token) : undefined;
       }
     }

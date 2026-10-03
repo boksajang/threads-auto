@@ -1,7 +1,7 @@
 {
   "name": "threads-auto",
   "productName": "Threads Auto",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0-beta.2",
   "description": "Codex CLI 기반 멀티 계정 스레드 자동화 도구",
   "author": "복사장",
   "license": "MIT",

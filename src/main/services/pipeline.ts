@@ -1,4 +1,3 @@
-import { threadsPermalink } from './comment-context';
 import { randomUUID } from 'node:crypto';
 import type { Account, AgentResult, AgentRole, CoupangLinkQueueStatus, CoupangProductQueueItem, JobRecord, PipelineQualityDecision, PipelineStage, PostRecord, QualityVeto, SourceCandidate, SourceType } from '../../shared/domain';
 import { POLICY } from '../../shared/policy';
@@ -757,8 +756,6 @@ ${JSON.stringify({profile:this.profile(account),recent})}`;
     this.repositories.addLog('INFO', 'COMMENTS', `미처리 댓글 ${pending.size}개를 확인했습니다.`, undefined, account.id);
     let replied = 0;
     for (const comment of comments) {
-      if(comment.parent?.id===comment.postId)this.repositories.saveCommentParent({accountId:account.id,postId:comment.postId,
-        body:comment.parent.text??'',permalink:threadsPermalink(comment.parent.permalink),publishedAt:comment.parent.timestamp});
       if (!pending.has(comment.id) || !comment.text.trim()) continue;
       this.repositories.upsertCommentDiscovery({ id:comment.id, accountId:account.id, postId:comment.postId,
         body:comment.text, authorUsername:comment.username, commentedAt:comment.createdAt });

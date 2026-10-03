@@ -258,7 +258,6 @@ export interface PostRecord {
 }
 
 export interface CommentRecord {
-  postPermalink?: string;
   postBody?: string;
   postPublishedAt?: string;
   id: string;

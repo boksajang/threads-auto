@@ -2,6 +2,8 @@ import type { Account } from '../../shared/domain';
 
 export type ContentMode = 'DAILY' | 'PROMOTION' | 'COUPANG_PROMOTION';
 
+export const PROMOTION_PROFILE_RULE = `계정의 주제(topic)는 일상 글에만 적용한다. 홍보는 제공된 상품·블로그·YouTube 자료 자체를 소재로 사용하며 일상 주제와의 관련성을 요구하지 않는다. 관련성이 없다는 이유로 USER_PROFILE_CONFLICT, LOW_RESONANCE 또는 다른 사유로 반려하거나 일상 주제에 맞추려고 근거 없는 활용 장면을 만들지 마라. audience가 비어 있으면 독자층 제한 없이 작성하며, 미입력을 반려 사유로 삼지 마라. profile의 personality·tone·audience는 표현 방식과 독자 눈높이에 적용하고 forbiddenTopics·forbiddenExpressions는 계속 지켜라. Threads다운 훅을 위해 지정된 말투·성격을 바꾸지 말고, 확인된 상품·자료의 이점을 전달하라. 주제 제한의 면제는 사실성·금지사항·중복·문장 품질 검사의 면제가 아니다.`;
+
 export const THREADS_COMMON_WRITING_RULES = `모든 Threads 글의 문장·훅·어휘·구두점·마무리는 작성 Agent가 직접 결정한다. Core가 채울 문장 템플릿이나 미완성 문장을 반환하지 않는다. 일상·블로그·유튜브·쿠팡·네이버 쇼핑·여행에 공통으로, 마침표·물음표·느낌표·말줄임표·쌍점·쌍반점 뒤에서 두 번 개행하여 빈 줄 한 줄을 삽입한다. 단순히 다음 줄로만 내리지 말고 문단 사이가 한 줄 비도록 작성한다. 연속 구두점(!!, ?!, ...)과 바로 이어지는 닫는 따옴표·괄호까지 붙여 쓴 뒤 빈 줄 한 줄을 삽입한다. 쉼표 뒤에서는 줄바꿈하지 않고 같은 문장으로 이어 쓴다. URL·소수·천 단위 숫자·시각 내부 기호는 쪼개지 않는다. 문장을 길게 쓴 뒤 줄바꿈으로 감추거나 줄 수를 채우기 위해 구두점을 남발하지 않는다. 검수 Agent는 수정이 필요하면 사유를 작성 Agent에 돌려주고, 승인한 본문을 임의로 고쳐 쓰지 않는다.`;
 
 export const COMMENT_REPLY_RULES = `댓글 답글은 새 게시물의 훅이나 참여 유도 글이 아니다. 상대가 다시 답하지 않아도 대화가 자연스럽게 마무리되는 짧은 답글을 계정 말투로 작성하라.
@@ -70,7 +72,7 @@ ${AFFILIATE_MARKETING_DIRECTION}
 }
 
 export function buildHumanQualityPrompt(input: {
-  profile: Pick<Account, 'topic' | 'personality' | 'tone' | 'audience' | 'forbiddenTopics' | 'forbiddenExpressions'>;
+  profile: Pick<Account, 'personality' | 'tone' | 'audience' | 'forbiddenTopics' | 'forbiddenExpressions'> & { topic?: string };
   mode: ContentMode;
   topic?: string;
   body: string;
@@ -83,7 +85,7 @@ ${DAILY_WRITING_DIRECTION}
 작성자의 의도나 예상 반응을 대신 만들어 글을 변호하지 마라. 첫 줄이 약하면 다른 장점으로 상쇄할 수 없다. 문법이 맞고 말이 된다는 것은 PASS 근거가 아니다. 문장을 지워도 핵심과 감정이 그대로면 불필요한 설명이다. 마지막 줄은 질문/평서문 각각의 자연스러움을 판단하고, 물음표 유무 자체로 가산점이나 감점을 주지 않는다.
 간결성은 별도 탈락 조건이다. 속으로 더 짧은 입말 버전을 만들어 비교하라. 본문의 예시·조건·부연을 상당 부분 덜어도 상황과 감정과 독자가 보탤 말이 그대로라면 현재 원문은 EXPLANATORY_STACKING 또는 REDUNDANT_SUMMARY로 REJECT한다. 개선안을 content로 대신 반환하지 마라. '구체성을 더한다', '추가 부담을 제시한다'는 이유만으로 불필요한 절을 정당화하지 마라. 훅에 모순이 있어도 본문이 사용자 요구사항 설명서처럼 늘어지면 NON_NATIVE_THREADS_VOICE로 탈락이다.
 
-profile은 사용자가 직접 지정한 본문 가공 기준이다. topic·personality·tone·audience를 포함해 소재·관점·어휘·강도·호흡을 판정하고 forbiddenTopics·forbiddenExpressions는 반드시 지켜라. Threads다운 자연스러움이나 첫 문장 훅을 만들기 위해 사용자의 말투·성격·독자층을 반대 방향으로 바꾸거나 지우지 마라. 두 요구가 충돌하면 사용자 설정을 우선한 다른 표현이 가능한지 먼저 판단하고, 양립할 수 없거나 본문이 설정을 무시했으면 USER_PROFILE_CONFLICT로 REJECT하라.
+profile은 사용자가 직접 지정한 본문 가공 기준이다. audience가 비어 있으면 독자층 제한 없이 작성하며, 미입력을 반려 사유로 삼지 마라. topic·personality·tone·audience를 포함해 소재·관점·어휘·강도·호흡을 판정하고 forbiddenTopics·forbiddenExpressions는 반드시 지켜라. Threads다운 자연스러움이나 첫 문장 훅을 만들기 위해 사용자의 말투·성격·독자층을 반대 방향으로 바꾸거나 지우지 마라. 두 요구가 충돌하면 사용자 설정을 우선한 다른 표현이 가능한지 먼저 판단하고, 양립할 수 없거나 본문이 설정을 무시했으면 USER_PROFILE_CONFLICT로 REJECT하라.
 
 최종 반증 심사 순서(첫 문장 훅과 전체 말투를 각각 독립적으로 검사):
 0. 이 글에는 실제 경험을 뒷받침하는 출처가 없다. 특정 날짜·장소·사람과의 사건, 실제로 한 말, 구매·수익·경험을 지어냈다면 UNSUPPORTED_EPISODE 또는 INVENTED_DIALOGUE다. 일반적인 의견·선호·생활 패턴이나 조건부 상황까지 금지하지는 않는다. 자연스러운 재치와 비유는 허용하지만 억지 명언·교훈으로 평범한 내용을 포장하지 마라.
@@ -130,10 +132,10 @@ ${rejectionRules}
 
 ${buildModeQualityRubric(input.mode)}
 
-profile은 사용자가 직접 지정한 본문 가공 기준이다. Threads다운 자연스러움과 첫 문장 훅은 profile의 topic·personality·tone·audience를 지우거나 반대 방향으로 바꿔 얻어서는 안 되며 forbiddenTopics·forbiddenExpressions는 반드시 지켜야 한다. 사용자가 지정한 정보를 포함해 소재·관점·어휘·강도·호흡을 판정하라. 두 요구가 충돌하면 사용자 설정을 우선한 다른 표현이 가능한지 먼저 판단하고, 양립할 수 없거나 본문이 설정을 무시했으면 USER_PROFILE_CONFLICT로 REJECT하라.
+${PROMOTION_PROFILE_RULE}
 
 이전 Agent의 점수나 PASS 판단은 신뢰하지 말고 제공되지도 않았다고 가정하라. 첫 문장 훅과 전체 말투를 각각 독립적으로 검사하고, 단순히 맞춤법이 맞거나 짧거나 반말 어미라는 이유로 PASS하지 마라. 애매하면 REJECT하라. PASS라면 vetoes를 빈 배열로 두고 content에 원문을 한 글자도 바꾸지 않고 반환하라. REJECT라면 관찰 가능한 vetoes와 실제 문장 근거를 reason에 쓰고 content는 null로 둬라.
 
-${JSON.stringify(input)}`;
+${JSON.stringify({...input,profile:{...input.profile,topic:undefined}})}`;
 }
 

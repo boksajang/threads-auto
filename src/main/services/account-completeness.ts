@@ -1,10 +1,9 @@
 import type { AccountInput } from '../../shared/domain';
 
-const requiredProfileFields: Array<{ key: keyof Pick<AccountInput, 'name' | 'threadsHandle' | 'topic' | 'audience'>; label: string }> = [
+const requiredProfileFields: Array<{ key: keyof Pick<AccountInput, 'name' | 'threadsHandle' | 'topic'>; label: string }> = [
   { key: 'name', label: '계정명' },
   { key: 'threadsHandle', label: 'Threads 계정' },
   { key: 'topic', label: '주제' },
-  { key: 'audience', label: '대상 독자' },
 ];
 
 export function normalizeAccountDefaults<T extends AccountInput>(input: T): T {

@@ -113,7 +113,6 @@ function Dashboard({ snapshot, selectedAccountId, onSelectAccount, refresh, live
       account.threadsTokenValid===false&&'유효한 Threads Access Token',
       (expired(account.threadsTokenExpiresAt)||expired(account.threadsTokenDataAccessExpiresAt))&&'만료되지 않은 Threads Access Token',
       !account.topic.trim()&&'주제',
-      !account.audience.trim()&&'대상 독자',
       !snapshot.dashboard.codex.installed&&'Codex CLI 설치',
     ].filter((value):value is string=>Boolean(value));
     if(type==='YOUTUBE'){
@@ -177,7 +176,6 @@ const accountReadinessIssues=(account:Account,runtime:AppSnapshot['accountRuntim
   !account.threadsUserId&&'Threads 계정 연결',
   account.threadsUserId&&!runtime?.credentials.threads&&'Threads Access Token',
   !account.topic.trim()&&'주제',
-  !account.audience.trim()&&'대상 독자',
   !account.dailyEnabled&&!account.promotionEnabled&&'콘텐츠 성격',
 ].filter((value):value is string=>Boolean(value));
 function Accounts({ accounts, runtime, settings, selectedAccountId, onSelectAccount, refresh }:{accounts:Account[];runtime:AppSnapshot['accountRuntime'];settings:AppSettings;selectedAccountId:string;onSelectAccount:(accountId:string)=>void;refresh:()=>Promise<void>}) {
@@ -235,7 +233,7 @@ function AccountDialog({value,onClose,onSaved}:{value:AccountInput;onClose:()=>v
     <div className="modal-body form-grid">{error&&<div className="alert" role="alert">{error}</div>}
       <div className="threads-profile-summary wide"><span>Threads 프로필</span><strong>{form.name}</strong><small>@{form.threadsHandle.replace(/^@/,'')}</small></div>
       <Field label="주제" wide><textarea autoFocus value={form.topic} onChange={e=>field('topic',e.target.value)}/></Field><Field label="성격 (선택)"><textarea placeholder="[표준] 일반적이고 균형 잡힌 성격" value={form.personality} onChange={e=>field('personality',e.target.value)}/></Field><Field label="말투 (선택)"><textarea placeholder="[표준] 정중하고 자연스러운 말투" value={form.tone} onChange={e=>field('tone',e.target.value)}/></Field>
-      <Field label="대상 독자"><textarea value={form.audience} onChange={e=>field('audience',e.target.value)}/></Field><Field label="금지 주제 (선택)"><textarea value={form.forbiddenTopics} onChange={e=>field('forbiddenTopics',e.target.value)}/></Field><Field label="금지 표현 (선택)"><textarea value={form.forbiddenExpressions} onChange={e=>field('forbiddenExpressions',e.target.value)}/></Field>
+      <Field label="대상 독자 (선택)"><textarea value={form.audience} onChange={e=>field('audience',e.target.value)}/></Field><Field label="금지 주제 (선택)"><textarea value={form.forbiddenTopics} onChange={e=>field('forbiddenTopics',e.target.value)}/></Field><Field label="금지 표현 (선택)"><textarea value={form.forbiddenExpressions} onChange={e=>field('forbiddenExpressions',e.target.value)}/></Field>
       <Field label="일상 비율"><input type="number" min="0" value={form.dailyRatio} onChange={e=>field('dailyRatio',Number(e.target.value))}/></Field><Field label="홍보 비율"><input type="number" min="0" value={form.promotionRatio} onChange={e=>field('promotionRatio',Number(e.target.value))}/></Field>
       <Field label="하루 게시 목표"><input type="number" min="1" max="50" value={form.dailyPostTarget} onChange={e=>field('dailyPostTarget',Number(e.target.value))}/></Field><Field label="댓글 확인 주기"><select value={form.commentIntervalMinutes} onChange={e=>field('commentIntervalMinutes',Number(e.target.value))}><option value="5">5분</option><option value="10">10분</option><option value="30">30분</option><option value="60">1시간</option></select></Field>
       <Field label="운영 시작"><input type="time" value={form.operationStart} onChange={e=>field('operationStart',e.target.value)}/></Field><Field label="운영 종료"><input type="time" value={form.operationEnd} onChange={e=>field('operationEnd',e.target.value)}/></Field>

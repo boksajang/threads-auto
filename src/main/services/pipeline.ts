@@ -9,7 +9,7 @@ import { UncertainRemoteOperationError, type CoupangProvider, type ProviderRegis
 import { isThreadsRemoteObjectMissing } from '../providers/threads-error-classification';
 import type { SettingsManager } from './settings';
 import { selectContentMode } from './content-mode';
-import { buildHumanQualityPrompt, buildModeQualityRubric, DAILY_WRITING_DIRECTION, AFFILIATE_MARKETING_DIRECTION, THREADS_COMMON_WRITING_RULES, COMMENT_REPLY_RULES } from './content-quality';
+import { buildHumanQualityPrompt, buildModeQualityRubric, DAILY_WRITING_DIRECTION, AFFILIATE_MARKETING_DIRECTION, THREADS_COMMON_WRITING_RULES, COMMENT_REPLY_RULES, PROMOTION_PROFILE_RULE } from './content-quality';
 import type { JobHandler } from './scheduler';
 import type { PublishEligibility } from './publish-eligibility';
 import { redactForUi } from './redaction';
@@ -164,9 +164,9 @@ export class AutomationPipeline implements JobHandler {
     });
   }
 
-  private profile(account: Account) {
+  private profile(account: Account, mode: 'DAILY' | 'PROMOTION' = 'DAILY') {
     const style = resolveAccountStyle(account);
-    return { topic: account.topic, personality: style.personality, tone: style.tone, audience: account.audience,
+    return { topic: mode === 'DAILY' ? account.topic : undefined, personality: style.personality, tone: style.tone, audience: account.audience,
       forbiddenTopics: account.forbiddenTopics, forbiddenExpressions: account.forbiddenExpressions };
   }
 
@@ -468,11 +468,11 @@ ${JSON.stringify({profile:this.profile(account),recent})}`;
     const rawExcludedNames=manualCoupang ? [...new Set([
       promotionCandidate?.title,
     ].filter((value):value is string=>Boolean(value?.trim())).map((value)=>value.trim()))] : [];
-    const userProfileAuthorityRule=`profile의 topic·personality·tone·audience·forbiddenTopics·forbiddenExpressions는 사용자가 이 계정에 직접 지정한 본문 가공 기준이며 선택적인 참고사항이 아니다. 입력 정보 전체를 후보 선택과 본문 가공에 고려하되, 한 문장에 모든 속성을 노출하거나 서로 무관한 직업·생활 요소를 합성하라는 뜻은 아니다. 무엇을 고르고 어떤 시선과 어휘·강도·호흡으로 말할지는 현재 소재에 실제로 관련 있는 프로필 정보를 사용해 결정하라. 'Threads다운 말투'나 첫 문장 훅은 profile을 대체하거나 배척하는 상위 규칙이 아니며, 반드시 사용자가 지정한 말투와 성격의 범위 안에서 구현한다. 예를 들어 존댓말을 반말로, 차분한 말투를 공격적인 말투로, 특정 독자층을 불특정 대중으로 임의 변경하지 마라. forbiddenTopics와 forbiddenExpressions는 강제 제외 조건이다. profile과 자연스러운 Threads 문장을 함께 만족시키기 어렵다면 사용자 설정을 무시하지 말고 다른 소재·표현으로 다시 작성하며, 끝내 양립할 수 없을 때만 USER_PROFILE_CONFLICT로 REJECT하라.`;
+    const userProfileAuthorityRule=PROMOTION_PROFILE_RULE;
     const openingPlanRule=`angle에는 핵심 내용뿐 아니라 첫 문장에서 무엇을 먼저 꺼내야 피드의 독자가 다음 줄을 볼지도 포함하라. 훅은 질문표·감탄사·숫자·유행어를 붙이는 일이 아니다. 구체적인 마찰, 의외의 결과, 선명한 태도, 독자가 답하고 싶은 궁금증 가운데 현재 자료와 계정 말투에 맞는 시작을 Agent가 의미로 선택하라. 확인되지 않은 사실이나 경험을 만들지 말고 최근 글과 같은 시작 골격을 반복하지 마라.`;
     let topicPrompt = manualCoupang
-      ? `저장된 제휴 상품 페이지와 후기 표본을 의미 분석하라. 웹 검색이나 추가 페이지 접근은 하지 마라. topic에는 판매처·브랜드·수식어를 빼고 UI에서 구분할 짧은 일반 상품명을 반환하라. 제품 설명이나 옵션명을 그대로 되풀이한 후기 문장은 실사용 장점 근거로 세지 마라. 여러 후기에서 실제 사용 장점이 의미상 반복되면 그것을 우선하라. 후기 개수·평점·인기 자체는 근거의 신뢰도를 가늠하는 정보일 뿐 독자에게 줄 상품 이점이 아니다. 공통 장점이 뚜렷하지 않으면 서로 다른 후기 중 구체적인 사용 맥락이나 평가가 담긴 약 2건을 골라, 억지 공통점을 만들지 말고 두 관찰을 짧은 추천 관점으로 가공하라. angle에는 독자가 얻는 구체적인 사용 이점 한두 개만 '무엇이 왜 좋은지'가 드러나게 정리하라. angle에 후기·리뷰의 반복 여부, 공통 여부, 개수, 평점이나 자료를 수집한 과정을 설명하지 마라. 후기 수가 많다는 말이나 유보적인 표현으로 구체적 이점의 빈자리를 메우지 마라. 유효한 후기가 없으면 확인된 상품 구조나 용도로만 진행할 수 있지만, 구체적인 추천 이유를 뒷받침할 근거가 전혀 없으면 REJECT하라. 한 후기의 과장, 작성자명, 판매처명, 가격·할인·재고·배송, 직접 사용 경험은 제외하라. sourceUrls에는 제공된 상품 페이지 URL만 반환하고 imageUrl에는 첫 저장 이미지를 그대로 반환하라.\n${JSON.stringify({ profile:this.profile(account), candidate:promptCandidate, excludedRawNames:rawExcludedNames, priorResearchUrls:cachedResearchUrls.slice(0,20) })}`
-      : `홍보 후보가 계정과 맞는지, 과거 게시물과 같은 의미인지, 현재 홍보 가치가 있는지 판단하라. Blog와 YouTube의 angle은 자료 전체의 교훈이나 핵심 요약이 아니다. 친구에게 지금 보여주고 싶은 구체적인 장면·도움·결과 하나를 골라, 첫마디부터 보고 싶게 끌어당길 방향을 정하라. 배경 설명·중요성 강조·긴 조건문을 먼저 놓는 관점은 다시 고른다. 허위 경험·사건·효과는 만들지 않되 친근한 감정과 초대 표현은 허용한다. YouTube Shorts/Long-form이 같은 내용이면 Long-form을 우선하되, 코드가 아니라 네가 의미를 판단한다. 과거 Long-form과 같은 Shorts는 REJECT하고, 과거 Shorts와 같은 신규 Long-form은 허용할 수 있다.\n${JSON.stringify({ profile: this.profile(account), candidate: promptCandidate, recent, promotionHistory })}`;
+      ? `저장된 제휴 상품 페이지와 후기 표본을 의미 분석하라. 웹 검색이나 추가 페이지 접근은 하지 마라. topic에는 판매처·브랜드·수식어를 빼고 UI에서 구분할 짧은 일반 상품명을 반환하라. 제품 설명이나 옵션명을 그대로 되풀이한 후기 문장은 실사용 장점 근거로 세지 마라. 여러 후기에서 실제 사용 장점이 의미상 반복되면 그것을 우선하라. 후기 개수·평점·인기 자체는 근거의 신뢰도를 가늠하는 정보일 뿐 독자에게 줄 상품 이점이 아니다. 공통 장점이 뚜렷하지 않으면 서로 다른 후기 중 구체적인 사용 맥락이나 평가가 담긴 약 2건을 골라, 억지 공통점을 만들지 말고 두 관찰을 짧은 추천 관점으로 가공하라. angle에는 독자가 얻는 구체적인 사용 이점 한두 개만 '무엇이 왜 좋은지'가 드러나게 정리하라. angle에 후기·리뷰의 반복 여부, 공통 여부, 개수, 평점이나 자료를 수집한 과정을 설명하지 마라. 후기 수가 많다는 말이나 유보적인 표현으로 구체적 이점의 빈자리를 메우지 마라. 유효한 후기가 없으면 확인된 상품 구조나 용도로만 진행할 수 있지만, 구체적인 추천 이유를 뒷받침할 근거가 전혀 없으면 REJECT하라. 한 후기의 과장, 작성자명, 판매처명, 가격·할인·재고·배송, 직접 사용 경험은 제외하라. sourceUrls에는 제공된 상품 페이지 URL만 반환하고 imageUrl에는 첫 저장 이미지를 그대로 반환하라.\n${JSON.stringify({ profile:this.profile(account,'PROMOTION'), candidate:promptCandidate, excludedRawNames:rawExcludedNames, priorResearchUrls:cachedResearchUrls.slice(0,20) })}`
+      : `홍보 후보의 근거와 독자에게 전달할 이점, 과거 게시물과의 의미 중복, 현재 홍보 가치를 판단하라. Blog와 YouTube의 angle은 자료 전체의 교훈이나 핵심 요약이 아니다. 친구에게 지금 보여주고 싶은 구체적인 장면·도움·결과 하나를 골라, 첫마디부터 보고 싶게 끌어당길 방향을 정하라. 배경 설명·중요성 강조·긴 조건문을 먼저 놓는 관점은 다시 고른다. 허위 경험·사건·효과는 만들지 않되 친근한 감정과 초대 표현은 허용한다. YouTube Shorts/Long-form이 같은 내용이면 Long-form을 우선하되, 코드가 아니라 네가 의미를 판단한다. 과거 Long-form과 같은 Shorts는 REJECT하고, 과거 Shorts와 같은 신규 Long-form은 허용할 수 있다.\n${JSON.stringify({ profile: this.profile(account,'PROMOTION'), candidate: promptCandidate, recent, promotionHistory })}`;
     topicPrompt=`${manualCoupang?AFFILIATE_MARKETING_DIRECTION:buildModeQualityRubric('PROMOTION')}\n${userProfileAuthorityRule}\n${openingPlanRule}\n${topicPrompt}`;
     let topic:AgentResult|undefined;
     let topicFeedback='';
@@ -530,7 +530,7 @@ ${JSON.stringify({profile:this.profile(account),recent})}`;
       : 'Blog·YouTube 글의 목적은 친구에게 볼 만한 자료를 권하는 것이다. 확인된 매력 하나로 짧고 경쾌하게 말을 걸고, 보고 싶어지는 이유를 구체적으로 풀어라. 친근한 감정·가벼운 유머·초대·주관적인 기대는 사실을 꾸미지 않는 범위에서 사용할 수 있다. 자료의 핵심을 빠짐없이 설명하는 요약문은 쓰지 않는다. 원문을 직접 보거나 실천했다고 가장하지 말고, 자료에 없는 효과·전망·이용 대상·개인 경험·사건을 만들지 마라. 원문 문장이나 구조도 가깝게 복제하지 마라.';
     const qualityMode=coupangCandidate?'COUPANG_PROMOTION' as const:mode;
     const threadsNativeWritingRule=`첫 문장은 독자가 이미 주제에 관심 있다고 가정한 배경 설명이나 대상의 정의로 시작하지 마라. 첫 줄만 피드에 남겨도 다음 줄을 볼 이유가 있어야 한다. 구체적인 마찰·의외의 결과·화자의 선명한 태도·독자가 답하고 싶은 궁금증 중 현재 내용에 가장 자연스러운 하나를 먼저 꺼내라. 질문표·감탄사·숫자·유행어·과장·결론 숨기기를 훅으로 착각하지 말고, 최근 글과 같은 시작 골격도 반복하지 마라. 계정의 tone은 반말·존댓말 어미만 정하는 값이 아니다. 문장 길이, 어순, 말의 세기, 자연스러운 생략과 리듬까지 그 화자가 지인에게 실제로 말할 법하게 써라. 어미를 떼었을 때 짧은 보고서·강의 요약·광고 카탈로그만 남거나, 긴 조건절 뒤에 원인과 결과를 가지런히 설명하면 실제 Threads 말투가 아니므로 다시 써라. 일부러 문법을 틀리거나 유행어를 흉내 내지는 마라.`;
-    const writerBasePrompt=`Threads 게시물 본문을 작성하라. 계정 말투를 지키고 제공되지 않은 시사 사실, 인물, 인용, 구체적 신상이나 실제 목격 주장을 만들지 마라. ${userProfileAuthorityRule} ${threadsNativeWritingRule} ${writerModeInstruction} ${coupangCandidate?AFFILIATE_MARKETING_DIRECTION:buildModeQualityRubric('PROMOTION')} 공통 구두점 줄바꿈 지침을 지켜라. 제목, 해시태그, 억지 독자 호칭, AI식 요약 문구를 쓰지 마라. ${coupangCandidate ? '링크와 제휴 고지문을 출력하지 마라.' : '링크가 있으면 본문에 넣어라.'} 불필요한 인사/설명을 출력하지 마라.\n${JSON.stringify({ profile: this.profile(account), mode:coupangCandidate?'COUPANG_PROMOTION':mode, provenance, topic, candidate: verifiedPromptCandidate, excludedRawNames:rawExcludedNames, recent })}`;
+    const writerBasePrompt=`Threads 게시물 본문을 작성하라. 계정 말투를 지키고 제공되지 않은 시사 사실, 인물, 인용, 구체적 신상이나 실제 목격 주장을 만들지 마라. ${userProfileAuthorityRule} ${threadsNativeWritingRule} ${writerModeInstruction} ${coupangCandidate?AFFILIATE_MARKETING_DIRECTION:buildModeQualityRubric('PROMOTION')} 공통 구두점 줄바꿈 지침을 지켜라. 제목, 해시태그, 억지 독자 호칭, AI식 요약 문구를 쓰지 마라. ${coupangCandidate ? '링크와 제휴 고지문을 출력하지 마라.' : '링크가 있으면 본문에 넣어라.'} 불필요한 인사/설명을 출력하지 마라.\n${JSON.stringify({ profile: this.profile(account,'PROMOTION'), mode:coupangCandidate?'COUPANG_PROMOTION':mode, provenance, topic, candidate: verifiedPromptCandidate, excludedRawNames:rawExcludedNames, recent })}`;
     const sourceUrl=promotionCandidate?.sourceUrl;
     const allowedLink=coupangCandidate?undefined:sourceUrl||(account.fixedLinkEnabled?account.fixedLinkUrl:undefined);
     let body='';
@@ -564,9 +564,9 @@ ${JSON.stringify({profile:this.profile(account),recent})}`;
       }
       this.progress(runId,'REVIEWER',68,`품질 Agent가 ${attempt}/${submissionLimit}차 본문의 사실성과 자연스러움을 검토하고 있습니다.`,{draftBody:writerBody});
       const reviewer=await this.agent('reviewer',coupangCandidate?buildHumanQualityPrompt({
-        profile:this.profile(account),mode:'COUPANG_PROMOTION',topic:topic.topic,body:writerBody,
+        profile:this.profile(account,'PROMOTION'),mode:'COUPANG_PROMOTION',topic:topic.topic,body:writerBody,
         evidence:{candidate:verifiedPromptCandidate,plan:topic,excludedRawNames:rawExcludedNames},
-      }):`본문의 사실성, 자연스러움, 계정 말투, 과장, 의미 중복과 실제 게시 가치를 검토하라. ${buildModeQualityRubric(mode)} PROMOTION은 생활감이나 유머 부족을 감점하지 마라. 후보에 없는 사실을 추가하거나 원문을 목차처럼 재구성하지 않았는지 검토하라. 반려할 때는 작성 Agent가 다음 제출에서 무엇을 덜고, 무엇을 구체화하고, 어떤 사실 경계를 지켜야 하는지 reason에 실행 가능한 수정 지시를 써라. 통과할 때는 최종 본문을 content에 반환하고 단순 금지어 치환이나 문자열 유사도로 판단하지 마라.\n${JSON.stringify({profile:this.profile(account),mode,provenance,plan:topic,evidence:verifiedPromptCandidate,draft:writerBody,recent})}`);
+      }):`본문의 사실성, 자연스러움, 계정 말투, 과장, 의미 중복과 실제 게시 가치를 검토하라. ${PROMOTION_PROFILE_RULE} ${buildModeQualityRubric(mode)} PROMOTION은 생활감이나 유머 부족을 감점하지 마라. 후보에 없는 사실을 추가하거나 원문을 목차처럼 재구성하지 않았는지 검토하라. 반려할 때는 작성 Agent가 다음 제출에서 무엇을 덜고, 무엇을 구체화하고, 어떤 사실 경계를 지켜야 하는지 reason에 실행 가능한 수정 지시를 써라. 통과할 때는 최종 본문을 content에 반환하고 단순 금지어 치환이나 문자열 유사도로 판단하지 마라.\n${JSON.stringify({profile:this.profile(account,'PROMOTION'),mode,provenance,plan:topic,evidence:verifiedPromptCandidate,draft:writerBody,recent})}`);
       quality=[{stage:'REVIEWER',decision:reviewer.decision==='PASS'?'PASS':'REJECT',reason:reviewer.reason,vetoes:reviewer.vetoes}];
       if(reviewer.decision!=='PASS'||reviewer.vetoes.length>0||!reviewer.content?.trim()){
         finalFailure=`품질 Agent 반려: ${reviewer.reason}`;
@@ -595,7 +595,7 @@ ${JSON.stringify({profile:this.profile(account),recent})}`;
 
       this.progress(runId,'ORCHESTRATOR',86,coupangCandidate?'독립 광고 품질 Agent가 상품 이점과 근거 연결을 최종 판정하고 있습니다.':'독립 자연스러움 Agent가 사람다운 문장인지 최종 판정하고 있습니다.',{draftBody:candidateBody,quality});
       const finalDecision=await this.agent('orchestrator',buildHumanQualityPrompt({
-        profile:this.profile(account),mode:qualityMode,body:candidateBody,evidence:verifiedPromptCandidate,
+        profile:this.profile(account,'PROMOTION'),mode:qualityMode,body:candidateBody,evidence:verifiedPromptCandidate,
       }));
       quality.push({stage:'ORCHESTRATOR',decision:finalDecision.decision==='PASS'?'PASS':'REJECT',reason:finalDecision.reason,vetoes:finalDecision.vetoes});
       if(finalDecision.decision!=='PASS'||finalDecision.vetoes.length>0||!finalDecision.content?.trim()||finalDecision.content.trim()!==candidateBody){
@@ -761,7 +761,7 @@ ${JSON.stringify({profile:this.profile(account),recent})}`;
         body:comment.text, authorUsername:comment.username, commentedAt:comment.createdAt });
       let attemptedReplyBody = '';
       try {
-        const result = await this.agent('writer', `${COMMENT_REPLY_RULES}\n${JSON.stringify({ profile: this.profile(account), comment: comment.text })}`);
+        const result = await this.agent('writer', `${COMMENT_REPLY_RULES}\n${JSON.stringify({ profile: this.profile(account,'PROMOTION'), comment: comment.text })}`);
         if (result.decision === 'PASS' && result.content?.trim()) {
           const replyBody=result.content.trim(); attemptedReplyBody=replyBody;
           const reply = await this.threads.reply(account.id, comment.id, replyBody);

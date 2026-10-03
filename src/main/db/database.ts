@@ -318,6 +318,7 @@ const migrations = [
   CREATE INDEX IF NOT EXISTS affiliate_performance_by_key_range_idx
     ON affiliate_performance_by_key(credential_fingerprint,performance_date);
   `,
+  `ALTER TABLE accounts ADD COLUMN threads_token_check_failed_at TEXT;`,
 ];
 
 export class AppDatabase {

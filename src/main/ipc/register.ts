@@ -55,6 +55,7 @@ export function registerIpc(deps: Dependencies): void {
     const tokenStatus = await threadsAccounts.tokenStatus(accountId);
     if (!tokenStatus.stored) throw new Error('Threads Access Token이 없습니다. 계정 관리에서 토큰을 연결하세요.');
     if (tokenStatus.valid === false || tokenStatus.state === 'INVALID') throw new Error('Threads Access Token이 유효하지 않습니다. 새 장기 토큰을 연결하세요.');
+    if (tokenStatus.state === 'CHECK_FAILED') throw new Error('Threads 토큰 확인에 실패했습니다. 계정 관리에서 연결 확인을 다시 실행하세요.');
     if (tokenStatus.state === 'EXPIRED') throw new Error('Threads 토큰 또는 데이터 접근 기간이 만료되었습니다. 계정 관리에서 새 토큰을 연결하세요.');
     if (tokenStatus.missingScopes.length) throw new Error(`Threads 토큰에 필수 권한이 없습니다: ${tokenStatus.missingScopes.join(', ')}`);
   };

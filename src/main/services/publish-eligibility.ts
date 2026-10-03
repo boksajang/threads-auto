@@ -20,6 +20,8 @@ export class PublishEligibility {
     const tokenStatus = await this.credentials.status([`threadsToken:${accountId}`]);
     const missing = missingAccountRequirements(account, Boolean(tokenStatus[`threadsToken:${accountId}`]?.stored));
     if (!account.threadsUserId) missing.unshift('Threads 계정 인증');
+    if (account.threadsTokenCheckFailedAt) missing.push('Threads 토큰 연결 재확인');
+    if (account.threadsTokenValid === false || [account.threadsTokenExpiresAt,account.threadsTokenDataAccessExpiresAt].some(value=>value && Date.parse(value)<=Date.now())) missing.push('Threads 토큰 재인증');
     if (missing.length) throw new Error(`${account.name} 계정의 발행 설정이 필요합니다: ${[...new Set(missing)].join(', ')}`);
   }
 

@@ -26,6 +26,9 @@ export class UncertainRemoteOperationError extends Error {
 export class ProviderRequestError extends Error {
   constructor(message: string, readonly retryable: boolean, readonly retryAfterMs?: number, readonly status?: number, options?: ErrorOptions) { super(message, options); this.name = 'ProviderRequestError'; }
 }
+export class InvalidThreadsTokenError extends Error {
+  constructor(message: string, options?: ErrorOptions) { super(message, options); this.name = 'InvalidThreadsTokenError'; }
+}
 export class TokenInspectionUnavailableError extends Error {
   constructor(message: string, options?: ErrorOptions) { super(message, options); this.name = 'TokenInspectionUnavailableError'; }
 }

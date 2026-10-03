@@ -58,6 +58,7 @@ export interface Account {
   threadsTokenExpiresAt?: string;
   threadsTokenDataAccessExpiresAt?: string;
   threadsTokenCheckedAt?: string;
+  threadsTokenCheckFailedAt?: string;
   threadsTokenScopes?: string[];
   threadsTokenValid?: boolean;
   threadsTokenLastRefreshedAt?: string;
@@ -86,7 +87,7 @@ export interface Account {
   updatedAt: string;
 }
 
-export type AccountInput = Omit<Account, 'id' | 'threadsUserId' | 'threadsTokenIssuedAt' | 'threadsTokenExpiresAt' | 'threadsTokenDataAccessExpiresAt' | 'threadsTokenCheckedAt' | 'threadsTokenScopes' | 'threadsTokenValid' | 'threadsTokenLastRefreshedAt' | 'createdAt' | 'updatedAt'> & { id?: string };
+export type AccountInput = Omit<Account, 'id' | 'threadsUserId' | 'threadsTokenIssuedAt' | 'threadsTokenExpiresAt' | 'threadsTokenDataAccessExpiresAt' | 'threadsTokenCheckFailedAt' | 'threadsTokenCheckedAt' | 'threadsTokenScopes' | 'threadsTokenValid' | 'threadsTokenLastRefreshedAt' | 'createdAt' | 'updatedAt'> & { id?: string };
 export type AccountSaveInput = AccountInput;
 
 export interface ThreadsTokenStatus {
@@ -105,7 +106,7 @@ export interface ThreadsTokenStatus {
   refreshAvailableAt?: string;
   daysRemaining?: number;
   canRefresh: boolean;
-  state: 'UNKNOWN' | 'ACTIVE' | 'EXPIRING' | 'EXPIRED' | 'INVALID';
+  state: 'CHECK_FAILED' | 'UNKNOWN' | 'ACTIVE' | 'EXPIRING' | 'EXPIRED' | 'INVALID';
   message: string;
   warning?: string;
 }

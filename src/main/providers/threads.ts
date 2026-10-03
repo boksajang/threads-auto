@@ -1,6 +1,6 @@
 import type { ThreadsPostSummary, ThreadsProfile, ThreadsTokenDebugResult } from '../../shared/domain';
 import type { CredentialManager } from '../services/settings';
-import { ProviderRequestError, TokenInspectionUnavailableError, UncertainRemoteOperationError, type ConnectionResult, type InsightValues, type PublishInput, type PublishResult, type RemoteComment, type ThreadsProvider, type ThreadsTokenRefreshResult } from './contracts';
+import { InvalidThreadsTokenError, ProviderRequestError, TokenInspectionUnavailableError, UncertainRemoteOperationError, type ConnectionResult, type InsightValues, type PublishInput, type PublishResult, type RemoteComment, type ThreadsProvider, type ThreadsTokenRefreshResult } from './contracts';
 
 const API_HOST = 'https://graph.threads.net';
 const BASE_URL = API_HOST;
@@ -199,6 +199,7 @@ export class MetaThreadsProvider implements ThreadsProvider {
       return { id, username, name:name || username };
     } catch (error) {
       if (error instanceof ProviderRequestError) {
+        if (error.status === 401 || /\bcode 190\b/i.test(error.message)) throw new InvalidThreadsTokenError('Threads Access Token이 유효하지 않습니다. 새 토큰을 연결하세요.', { cause:error });
         if ([400,401,403].includes(error.status ?? 0)) throw new Error('Threads Access Token이 유효하지 않거나 필요한 권한이 없습니다. Meta Developers에서 장기 토큰을 다시 확인하세요.', { cause:error });
         if (error.status === 429) throw new Error('Threads API 요청이 너무 많습니다. 잠시 후 다시 시도하세요.', { cause:error });
         if ((error.status ?? 0) >= 500) throw new Error('Threads 서비스에 연결할 수 없습니다. 잠시 후 다시 시도하세요.', { cause:error });
@@ -243,6 +244,7 @@ export class MetaThreadsProvider implements ThreadsProvider {
         if (error.status === 400 && /\bcode 200\b/i.test(error.message) && /API access blocked/i.test(error.message)) {
           throw new TokenInspectionUnavailableError('Meta가 현재 User Access Token만으로는 토큰 상세 조회를 허용하지 않습니다.', { cause:error });
         }
+        if (error.status === 401 || /\bcode 190\b/i.test(error.message)) throw new InvalidThreadsTokenError('Threads Access Token이 유효하지 않습니다. 새 토큰을 연결하세요.', { cause:error });
         if ([400,401,403].includes(error.status ?? 0)) throw new Error('Threads 토큰 정보를 확인할 수 없습니다. Access Token과 권한을 다시 확인하세요.', { cause:error });
         if (error.status === 429) throw new Error('Threads 토큰 확인 요청이 너무 많습니다. 잠시 후 다시 시도하세요.', { cause:error });
         if ((error.status ?? 0) >= 500) throw new Error('Threads 서비스 오류로 토큰 정보를 확인하지 못했습니다. 잠시 후 다시 시도하세요.', { cause:error });

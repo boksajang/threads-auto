@@ -59,6 +59,7 @@ function accountFromRow(row: any): Account {
     threadsTokenExpiresAt: row.threads_token_expires_at ?? undefined,
     threadsTokenDataAccessExpiresAt: row.threads_token_data_access_expires_at ?? undefined,
     threadsTokenCheckedAt: row.threads_token_checked_at ?? undefined,
+    threadsTokenCheckFailedAt: row.threads_token_check_failed_at ?? undefined,
     threadsTokenScopes: row.threads_token_scopes_json == null ? undefined : json<string[]>(row.threads_token_scopes_json, []),
     threadsTokenValid: row.threads_token_valid == null ? undefined : bool(row.threads_token_valid),
     threadsTokenLastRefreshedAt: row.threads_token_last_refreshed_at ?? undefined,
@@ -381,6 +382,7 @@ export class Repositories {
           threads_token_checked_at=COALESCE(@checkedAt,threads_token_checked_at),
           threads_token_scopes_json=COALESCE(@scopesJson,threads_token_scopes_json),
           threads_token_valid=COALESCE(@valid,threads_token_valid),
+          threads_token_check_failed_at=NULL,
           threads_token_last_refreshed_at=COALESCE(@lastRefreshedAt,threads_token_last_refreshed_at),
           updated_at=@updatedAt
       WHERE id=@accountId`).run({
@@ -394,10 +396,19 @@ export class Repositories {
     return this.getAccount(accountId)!;
   }
 
+  recordThreadsTokenCheck(accountId: string, outcome: 'VERIFIED' | 'INVALID' | 'CHECK_FAILED', checkedAt: string): Account {
+    const result = this.db.raw.prepare(`UPDATE accounts SET threads_token_valid=?, threads_token_checked_at=?,
+      threads_token_check_failed_at=?, updated_at=? WHERE id=?`).run(
+        outcome === 'VERIFIED' ? 1 : outcome === 'INVALID' ? 0 : null,
+        checkedAt, outcome === 'CHECK_FAILED' ? checkedAt : null, checkedAt, accountId);
+    if (result.changes !== 1) throw new Error('토큰 정보를 갱신할 계정을 찾을 수 없습니다.');
+    return this.getAccount(accountId)!;
+  }
+
   clearThreadsTokenMetadata(accountId: string): Account {
     const result = this.db.raw.prepare(`UPDATE accounts
       SET threads_token_issued_at=NULL, threads_token_expires_at=NULL, threads_token_data_access_expires_at=NULL,
-          threads_token_checked_at=NULL, threads_token_scopes_json=NULL, threads_token_valid=NULL,
+          threads_token_checked_at=NULL, threads_token_check_failed_at=NULL, threads_token_scopes_json=NULL, threads_token_valid=NULL,
           threads_token_last_refreshed_at=NULL, updated_at=?
       WHERE id=?`).run(new Date().toISOString(), accountId);
     if (result.changes !== 1) throw new Error('토큰 정보를 삭제할 계정을 찾을 수 없습니다.');

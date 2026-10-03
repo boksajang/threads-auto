@@ -1,13 +1,15 @@
 {
   "name": "threads-auto",
   "productName": "Threads Auto",
-  "version": "0.1.0",
+  "version": "0.1.0-beta.1",
   "description": "Codex CLI 기반 멀티 계정 스레드 자동화 도구",
   "author": "복사장",
   "license": "MIT",
   "main": ".vite/build/main.js",
   "private": true,
-  "engines": { "node": ">=24.15.0 <25 || >=26" },
+  "engines": {
+    "node": ">=24.15.0 <25 || >=26"
+  },
   "scripts": {
     "setup": "npm ci --ignore-scripts && node node_modules/electron/install.js && node node_modules/esbuild/install.js && node native-host/build.mjs",
     "native-host:build": "node native-host/build.mjs",

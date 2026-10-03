@@ -18,6 +18,14 @@
 
 별도 OpenAI API 키 대신 **설치·로그인된 Codex CLI**를 사용합니다. 모델 사용량은 연결된 Codex 계정의 이용 한도와 과금 정책을 따릅니다.
 
+## Windows 시험 배포 다운로드
+
+[v0.1.0-beta.1 Pre-release](https://github.com/boksajang/threads-auto/releases/tag/v0.1.0-beta.1)에서 **Threads-Auto-0.1.0-beta.1-win32-x64.zip**을 받으세요. ZIP 전체를 원하는 폴더에 풀고 **Threads Auto.exe**를 실행합니다. EXE만 따로 옮기지 마세요. GitHub가 자동으로 제공하는 `Source code` ZIP은 실행 앱이 아닙니다.
+
+Windows x64용 첫 시험 배포입니다. 별도의 앱 빌드는 필요 없으며, 콘텐츠 생성에는 설치·로그인된 Codex CLI가 필요합니다. Chrome 상품 수집기는 앱의 **확장프로그램 설치 → 개발자 모드 설치**에서 설정할 수 있습니다. DB·계정·API 정보는 포함하지 않으므로 처음 실행하면 자신의 계정을 등록해야 합니다.
+
+코드 서명이 없어 Windows 보안 경고가 표시될 수 있습니다. 다른 PC에서의 실제 운영 검증과 macOS 배포는 아직 완료하지 않았습니다.
+
 ## 개발자 모드 실행
 
 ### 준비

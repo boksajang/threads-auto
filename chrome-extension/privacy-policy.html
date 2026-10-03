@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Threads Auto - 쿠팡 상품 수집기 Chrome 확장 프로그램 개인정보처리방침">
+  <title>개인정보처리방침 | Threads Auto - 쿠팡 상품 수집기</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --background: #f5f5fa;
+      --surface: #ffffff;
+      --surface-soft: #f7f5ff;
+      --text: #171329;
+      --muted: #625d73;
+      --line: #e5e1ee;
+      --primary: #6d3df2;
+      --primary-soft: #eee8ff;
+      --success: #087a58;
+      --shadow: 0 18px 45px rgba(34, 22, 74, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+      font-size: 16px;
+      line-height: 1.75;
+      word-break: keep-all;
+    }
+
+    main {
+      width: min(920px, calc(100% - 32px));
+      margin: 48px auto;
+    }
+
+    .document {
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    header {
+      padding: 44px 48px 36px;
+      background:
+        radial-gradient(circle at 92% 12%, rgba(94, 218, 255, 0.22), transparent 28%),
+        linear-gradient(135deg, #15113b 0%, #40208c 60%, #6d3df2 100%);
+      color: #ffffff;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      padding: 6px 11px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.11);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 5vw, 42px);
+      line-height: 1.25;
+      letter-spacing: -0.035em;
+    }
+
+    header p {
+      max-width: 700px;
+      margin: 16px 0 0;
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+      margin-top: 24px;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 14px;
+    }
+
+    .content { padding: 20px 48px 48px; }
+
+    section {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    section:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 22px;
+      line-height: 1.4;
+      letter-spacing: -0.025em;
+    }
+
+    h3 {
+      margin: 22px 0 8px;
+      font-size: 17px;
+    }
+
+    p { margin: 10px 0; }
+
+    ul, ol {
+      margin: 12px 0;
+      padding-left: 24px;
+    }
+
+    li + li { margin-top: 8px; }
+
+    strong { color: var(--text); }
+
+    .summary {
+      margin: 8px 0 4px;
+      padding: 20px 22px;
+      border: 1px solid #dcd3ff;
+      border-left: 4px solid var(--primary);
+      border-radius: 14px;
+      background: var(--surface-soft);
+    }
+
+    .summary strong { color: var(--primary); }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 18px;
+      counter-reset: step;
+    }
+
+    .flow div {
+      position: relative;
+      min-height: 112px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fbfaff;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .flow div::before {
+      counter-increment: step;
+      content: counter(step);
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .checklist {
+      margin-top: 16px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .checklist li {
+      position: relative;
+      padding-left: 28px;
+    }
+
+    .checklist li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--success);
+      font-weight: 800;
+    }
+
+    .limited-use {
+      padding: 18px 20px;
+      border-radius: 14px;
+      background: #eefaf6;
+      color: #155b47;
+    }
+
+    footer {
+      padding: 24px 48px;
+      border-top: 1px solid var(--line);
+      background: #faf9fc;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 720px) {
+      main { margin: 18px auto; }
+      .document { border-radius: 18px; }
+      header, .content, footer { padding-left: 22px; padding-right: 22px; }
+      header { padding-top: 30px; }
+      .flow { grid-template-columns: 1fr; }
+      .flow div { min-height: auto; }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --background: #0f0d16;
+        --surface: #17141f;
+        --surface-soft: #211a35;
+        --text: #f5f1ff;
+        --muted: #b7b0c7;
+        --line: #342d43;
+        --primary: #ae8cff;
+        --primary-soft: #33235d;
+        --success: #64d8af;
+        --shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+      }
+
+      .flow div { background: #1d1927; }
+      footer { background: #14111c; }
+      .limited-use { background: #102d25; color: #aee7d3; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <article class="document">
+      <header>
+        <div class="eyebrow">Threads Auto · Chrome Extension</div>
+        <h1>개인정보처리방침</h1>
+        <p>이 방침은 Chrome 확장 프로그램 <strong>Threads Auto - 쿠팡 상품 수집기</strong>가 처리하는 정보와 그 이용 방법을 설명합니다.</p>
+        <div class="meta">
+          <span>시행일: 2026년 8월 30일</span>
+          <span>적용 버전: 0.1.2 이상</span>
+        </div>
+      </header>
+
+      <div class="content">
+        <section>
+          <h2>1. 핵심 안내</h2>
+          <div class="summary">
+            확장 프로그램은 사용자가 Threads Auto에서 직접 요청한 쿠팡 상품의 <strong>웹사이트 콘텐츠</strong>만 처리합니다. 개발자가 운영하는 외부 수집 서버로 데이터를 전송하거나, 광고·추적·판매 목적으로 이용하지 않습니다.
+          </div>
+        </section>
+
+        <section>
+          <h2>2. 처리하는 정보</h2>
+          <p>사용자가 Threads Auto에 상품 수집을 요청한 경우에만 다음 정보를 처리합니다.</p>
+          <ul>
+            <li>상품 식별값(<code>productId</code>, <code>itemId</code>)</li>
+            <li>상품명 원문</li>
+            <li>상품 갤러리 이미지 주소(최대 20개)</li>
+            <li>화면에 공개된 후기 본문, 상품 옵션 및 평점(최대 8건)</li>
+            <li>수집 완료 시각</li>
+          </ul>
+
+          <h3>처리하지 않는 정보</h3>
+          <ul class="checklist">
+            <li>후기 작성자의 이름·닉네임·아이디 등 작성자 표시정보</li>
+            <li>사용자의 웹 방문 기록 또는 방문 페이지 목록</li>
+            <li>쿠키, 로그인 정보, 비밀번호 및 인증정보</li>
+            <li>결제정보, 금융정보, 위치정보 및 연락처</li>
+            <li>키 입력, 마우스 움직임 및 일반적인 브라우저 활동</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>3. 처리 목적과 작동 방식</h2>
+          <p>처리한 정보는 Threads Auto에서 상품 자료를 확인하고, 사용자가 요청한 게시물 초안을 생성하는 목적으로만 사용합니다.</p>
+          <div class="flow" aria-label="상품 콘텐츠 처리 흐름">
+            <div>사용자가 Threads Auto에서 상품 수집을 요청합니다.</div>
+            <div>Threads Auto가 상품 식별값을 확장 프로그램에 전달합니다.</div>
+            <div>확장 프로그램이 일치하는 쿠팡 상품 페이지의 공개 콘텐츠를 확인합니다.</div>
+            <div>결과를 같은 컴퓨터의 Threads Auto로 반환합니다.</div>
+          </div>
+        </section>
+
+        <section>
+          <h2>4. 전송, 저장 및 보유 기간</h2>
+          <ul>
+            <li>확장 프로그램은 Chrome Native Messaging을 사용해 같은 컴퓨터에 설치된 Threads Auto와 통신합니다.</li>
+            <li>확장 프로그램 자체는 수집 결과를 Chrome 저장소에 지속적으로 보관하지 않습니다.</li>
+            <li>Threads Auto는 사용자가 확인할 수 있도록 수집 결과, 생성된 초안 및 처리 이력을 로컬 데이터베이스에 저장할 수 있습니다.</li>
+            <li>로컬에 저장된 정보는 사용자가 Threads Auto에서 해당 자료 또는 계정을 삭제할 때까지 보관될 수 있습니다.</li>
+          </ul>
+          <p>사용자가 Threads Auto에서 AI를 이용한 자료 분석이나 본문 생성을 직접 요청한 경우, 필요한 웹사이트 콘텐츠가 사용자가 선택하고 승인한 AI 실행 환경에서 처리될 수 있습니다. 확장 프로그램은 개발자가 운영하는 별도의 서버로 해당 정보를 직접 전송하지 않습니다.</p>
+        </section>
+
+        <section>
+          <h2>5. 제3자 제공 및 판매</h2>
+          <ul class="checklist">
+            <li>사용자 데이터를 판매하지 않습니다.</li>
+            <li>개인 맞춤 광고, 리타게팅 광고 또는 사용자 추적에 사용하지 않습니다.</li>
+            <li>확장 프로그램의 전용 목적과 관계없는 용도로 사용하거나 전송하지 않습니다.</li>
+            <li>신용도 판단, 대출 또는 금융 심사에 사용하지 않습니다.</li>
+          </ul>
+          <p>사용자가 요청한 기능을 수행하기 위해 사용자가 선택한 AI 서비스가 이용되는 경우에는 해당 서비스의 이용약관과 개인정보처리방침이 함께 적용될 수 있습니다.</p>
+        </section>
+
+        <section>
+          <h2>6. 권한과 보안</h2>
+          <ul>
+            <li><strong>호스트 권한:</strong> <code>https://www.coupang.com/products/*</code> 범위에서 요청 상품의 공개 콘텐츠를 확인하기 위해 사용합니다.</li>
+            <li><strong>nativeMessaging 권한:</strong> 같은 컴퓨터의 Threads Auto와 요청 및 결과를 주고받기 위해 사용합니다.</li>
+            <li>다른 웹사이트, 쿠팡의 다른 경로 또는 불필요한 브라우저 권한에는 접근하지 않습니다.</li>
+            <li>외부 원격 코드를 내려받거나 실행하지 않으며, 실행 코드는 확장 프로그램 패키지에 포함됩니다.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>7. 사용자의 선택권</h2>
+          <p>사용자는 언제든지 Chrome 확장 프로그램을 사용 중지하거나 제거할 수 있습니다. Threads Auto에 저장된 상품 자료와 처리 이력은 프로그램에서 제공하는 삭제 기능을 통해 관리할 수 있습니다.</p>
+        </section>
+
+        <section>
+          <h2>8. 제한적 사용 원칙</h2>
+          <p class="limited-use">Threads Auto - 쿠팡 상품 수집기의 정보 사용은 제한적 사용 요건을 포함한 Chrome Web Store 사용자 데이터 정책을 준수합니다. 처리한 정보는 확장 프로그램의 공개된 단일 목적을 제공하는 데 필요한 범위에서만 사용합니다.</p>
+        </section>
+
+        <section>
+          <h2>9. 방침 변경</h2>
+          <p>수집 항목, 이용 목적 또는 전달 방식이 변경되는 경우 이 페이지의 내용과 시행일을 갱신합니다. 중요한 변경이 있는 경우 Chrome Web Store 등록정보 또는 Threads Auto 프로그램을 통해 알립니다.</p>
+        </section>
+
+        <section>
+          <h2>10. 문의</h2>
+          <p>개인정보 및 확장 프로그램에 관한 문의는 Chrome Web Store의 <strong>Threads Auto - 쿠팡 상품 수집기</strong> 등록정보에 표시된 개발자 연락처를 이용해 주세요.</p>
+        </section>
+      </div>
+
+      <footer>
+        본 확장 프로그램은 Threads Auto의 보조 도구이며 Google, Chrome, Meta 및 쿠팡과 제휴하거나 이들 회사가 보증하는 제품이 아닙니다.
+      </footer>
+    </article>
+  </main>
+</body>
+</html>

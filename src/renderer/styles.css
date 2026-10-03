@@ -334,7 +334,7 @@ td, .log-row { font-size: 12px; }
 .collector-status small { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
 .collector-status .collector-error { color: var(--danger); }
 .collector-status .actions { justify-content: flex-end; }
-.collector-install-modal .modal-body { grid-template-columns: 52px minmax(0,1fr); align-items: start; }
+.collector-install-modal .modal-body { display: grid; grid-template-columns: 52px minmax(0,1fr); align-items: start; }
 .collector-install-modal .detail-facts { grid-column: 1 / -1; }
 .collector-install-icon { display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid color-mix(in srgb, var(--info) 45%, var(--border)); border-radius: 14px; color: var(--info); background: color-mix(in srgb, var(--info) 10%, var(--surface)); font-size: 20px; font-weight: 800; }
 .collector-install-modal .modal-body p { margin: 5px 0 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
@@ -376,7 +376,7 @@ td, .log-row { font-size: 12px; }
 .coupang-image-preview-trigger { display:block; width:100%; height:100%; min-height:0; padding:0; overflow:hidden; border:0; border-radius:7px; background:transparent; }
 .coupang-image-preview-trigger:focus-visible { outline:2px solid color-mix(in srgb,var(--provider-tone) 55%,transparent); outline-offset:2px; }
 .coupang-image-preview-trigger img { width:100%; height:100%; object-fit:cover; border-radius:7px; }
-.coupang-image-delete { position:absolute; top:3px; right:3px; display:grid; place-items:center; width:20px; height:20px; min-height:20px; padding:0; border-color:color-mix(in srgb,var(--danger) 45%,var(--border)); border-radius:50%; color:var(--danger); background:color-mix(in srgb,var(--surface) 90%,transparent); font-size:13px; line-height:1; }
+.coupang-image-delete { position:absolute; top:3px; right:3px; display:grid; place-items:center; width:28px; height:28px; min-height:28px; padding:0; border-color:color-mix(in srgb,var(--danger) 45%,var(--border)); border-radius:50%; color:var(--danger); background:color-mix(in srgb,var(--surface) 90%,transparent); font-size:13px; line-height:1; }
 .coupang-image-delete:disabled { opacity:.35; }
 .coupang-image-modal-backdrop { z-index:45; }
 .coupang-image-modal { width:min(648px,calc(100vw - 32px)); overflow:hidden; border:1px solid var(--border-strong); border-radius:14px; background:var(--surface); box-shadow:var(--shadow-md); }
@@ -393,7 +393,7 @@ td, .log-row { font-size: 12px; }
 .coupang-research-state { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
 .coupang-research-state small { color: var(--muted); font-size: 9.5px; }
 .coupang-product-copy .coupang-information-required, .coupang-product-copy .coupang-item-error { color: var(--danger); white-space: normal; }
-.coupang-item-actions { display: flex; align-items: center; gap: 6px; }
+.coupang-item-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .coupang-item-actions button { min-height: var(--control-compact-height); padding: 5px 9px; font-size: 10.5px; white-space: nowrap; }
 .coupang-generated-copy { display:grid; grid-template-columns:1fr; gap:9px; padding-top:10px; border-top:1px solid color-mix(in srgb,var(--provider-tone) 14%,var(--border)); }
 .coupang-generated-copy section { min-width:0; padding:10px 11px; border:1px solid color-mix(in srgb,var(--provider-tone) 18%,var(--border)); border-radius:9px; background:color-mix(in srgb,var(--provider-tone) 3%,var(--surface)); }
@@ -429,9 +429,9 @@ td, .log-row { font-size: 12px; }
   .coupang-manual-input { grid-template-columns: 1fr; }
   .coupang-manual-input > div button { justify-self: start; }
   .coupang-queue-summary { grid-template-columns: repeat(3, minmax(90px, 1fr)); }
-  .coupang-product-head { grid-template-columns: 22px 58px minmax(0, 1fr); }
+  .coupang-product-head { grid-template-columns: 22px 58px minmax(0, 1fr) auto; }
   .coupang-product-image { width: 58px; height: 58px; }
-  .coupang-item-actions { grid-column: 2; justify-content: flex-end; }
+  .coupang-item-actions { grid-column: 1 / -1; }
 }
 
 @media (max-width: 760px) {
@@ -446,8 +446,6 @@ td, .log-row { font-size: 12px; }
   .coupang-queue-summary { grid-template-columns: repeat(2, minmax(90px, 1fr)); }
   .coupang-generated-copy { grid-template-columns:1fr; }
   .coupang-queue-item { grid-template-columns: 1fr; }
-  .coupang-product-image { width: 72px; height: 72px; }
-  .coupang-item-actions { grid-column: 1; justify-content: flex-start; }
 }
 
 /* Content workspace: source review, pre-publish draft and agent quality */
@@ -548,8 +546,8 @@ td, .log-row { font-size: 12px; }
 }
 
 /* Account-scoped dashboard and consolidated activity history */
-.dashboard-account-select { display: flex; align-items: end; gap: 8px; }
-.dashboard-account-select label { display: grid; gap: 4px; color: var(--muted); font-size: 10.5px; font-weight: 700; }
+.dashboard-account-select { display: flex; align-items: center; gap: 8px; }
+.dashboard-account-select label { flex-shrink: 0; color: var(--muted); font-size: 10.5px; font-weight: 700; white-space: nowrap; }
 .dashboard-account-select select { width: 210px; min-height: 38px; padding-block: 7px; }
 .account-context { display: flex; align-items: center; gap: 14px; min-height: 54px; padding: 10px 15px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow-sm); }
 .account-context > div:first-child { display: flex; align-items: center; gap: 8px; }
@@ -620,7 +618,7 @@ td, .log-row { font-size: 12px; }
 .schedule-job-row > strong { color:var(--text); font-size:11.5px; }
 .schedule-account-badge { overflow:hidden; padding:4px 8px; border:1px solid color-mix(in srgb,var(--primary) 22%,var(--border)); border-radius:999px; color:var(--primary-dark); background:var(--primary-soft); font-weight:750; text-align:center; text-overflow:ellipsis; white-space:nowrap; }
 .schedule-content-cell { min-width:0; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-.schedule-content-cell select { width:150px; min-height:31px; padding:4px 8px; font-size:11px; }
+.schedule-content-cell select { width:150px; min-height:var(--control-compact-height); padding:4px 8px; font-size:11px; }
 .schedule-content-cell > small { color:var(--subtle); font-size:9.5px; }
 .schedule-content-cell .schedule-row-error { flex-basis:100%; color:var(--danger); }
 .schedule-save-button,.schedule-cancel-button { min-height: var(--control-compact-height); padding:4px 9px; font-size:10.5px; }
@@ -675,7 +673,6 @@ td, .log-row { font-size: 12px; }
 }
 
 @media (max-width: 980px) {
-  .dashboard-account-select label { display: none; }
   .dashboard-account-select select { width: 180px; }
   .account-metrics { grid-template-columns: repeat(2, minmax(135px, 1fr)); }
   .immediate-publish-actions { grid-template-columns: repeat(2,minmax(130px,1fr)); }
@@ -924,6 +921,7 @@ main { grid-column: 2; grid-row: 2; }
 }
 /* 성과 지표 행을 클릭하면 로컬에 저장된 실제 게시 본문을 펼친다. */
 .performance-summary-row { cursor: pointer; }
+.performance-summary-row td { vertical-align: middle; }
 .performance-summary-row:hover { background: var(--surface-hover, rgba(124, 58, 237, .07)); }
 .performance-body-row[hidden] { display: none; }
 .performance-body-row article { padding: 12px 8px; max-width: 780px; }

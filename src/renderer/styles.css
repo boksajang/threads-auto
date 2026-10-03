@@ -334,10 +334,6 @@ td, .log-row { font-size: 12px; }
 .collector-status small { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
 .collector-status .collector-error { color: var(--danger); }
 .collector-status .actions { justify-content: flex-end; }
-.collector-install-modal .modal-body { display: grid; grid-template-columns: 52px minmax(0,1fr); align-items: start; }
-.collector-install-modal .detail-facts { grid-column: 1 / -1; }
-.collector-install-icon { display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid color-mix(in srgb, var(--info) 45%, var(--border)); border-radius: 14px; color: var(--info); background: color-mix(in srgb, var(--info) 10%, var(--surface)); font-size: 20px; font-weight: 800; }
-.collector-install-modal .modal-body p { margin: 5px 0 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
 .coupang-manual-input { display: grid; grid-template-columns: minmax(0, 1fr) minmax(210px, 30%); gap: 12px; align-items: end; }
 .coupang-manual-input textarea { min-height: 108px; font-family: Consolas, "Malgun Gothic", monospace; font-size: 11px; line-height: 1.5; }
 .coupang-manual-input > div { display: grid; align-content: end; gap: 9px; }
@@ -860,9 +856,19 @@ td, .log-row { font-size: 12px; }
 .titlebar .extension-install-button { -webkit-app-region: no-drag; margin-left:auto; min-height:28px; height:28px; padding:3px 12px; display:flex; align-items:center; gap:6px; border:1px solid #b18aff; border-radius:7px; background:#713dc2; color:#fff; font-size:11px; font-weight:600; white-space:nowrap; }
 .titlebar .extension-install-button span { color:inherit; font-size:15px; }
 .titlebar .extension-install-button:hover:not(:disabled) { background:#8750dc; }
-.titlebar .extension-install-button.installed { background:#19352b; border-color:#34694f; color:#9bd6b8; opacity:1; cursor:default; pointer-events:none; transform:none; }
+.titlebar .extension-install-button.installed { background:#19352b; border-color:#34694f; color:#9bd6b8; opacity:1; }
 .extension-install-guide { -webkit-app-region:no-drag; user-select:text; color:var(--text); }
-.extension-install-guide li { margin:12px 0; line-height:1.6; }
+.extension-install-guide .modal { width:min(740px,calc(100vw - 32px)); }
+.extension-mode-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.extension-mode-options button { display:flex; flex-direction:column; justify-content:center; align-items:flex-start; gap:5px; min-height:70px; padding:12px; text-align:left; white-space:normal; }
+.extension-mode-options button span { font-size:11px; color:var(--muted); }
+.extension-mode-options button[aria-pressed="true"] { border-color:var(--primary); background:var(--primary-soft); }
+.extension-install-guide .modal-body > p { margin:0; font-size:12px; line-height:1.65; overflow-wrap:anywhere; }
+.extension-install-steps { margin:0; padding-left:22px; font-size:12px; }
+.extension-install-steps li { margin:8px 0; line-height:1.65; }
+.extension-folder-path { min-height:64px; resize:none; font-size:12px; overflow-wrap:anywhere; }
+.extension-install-guide .actions { flex-wrap:wrap; }
+@media (max-width:560px) { .extension-mode-options { grid-template-columns:1fr; } }
 .sidebar { grid-column: 1; grid-row: 2; }
 main { grid-column: 2; grid-row: 2; }
 .coupang-product-source { display: grid; gap: 16px; }

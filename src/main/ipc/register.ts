@@ -1,5 +1,7 @@
 import { app, ipcMain, shell, type BrowserWindow, type IpcMainInvokeEvent } from 'electron';
 import { z } from 'zod';
+import path from 'node:path';
+import { prepareExtensionInstallation } from '../services/extension-installation';
 import type { CoupangProductQueueItem, CoupangProviderConfig, CredentialKey, SourceCandidate, SourceType } from '../../shared/domain';
 import { COUPANG_CATEGORY_OPTIONS } from '../../shared/coupang-catalog';
 import { POLICY } from '../../shared/policy';
@@ -426,6 +428,16 @@ export function registerIpc(deps: Dependencies): void {
   handle('naver-brand-queue:summary', z.string().uuid(), (accountId)=>deps.repositories.naverBrandLinkSummary(accountId));
   handle('coupang-collector:status', undefined, async () => { const status=deps.coupangCollector.status();return {...status,installed:status.connected||await hasChromeCollectorInstalled()}; });
   handle('coupang-collector:acknowledge-prompt', undefined, () => deps.coupangCollector.acknowledgePrompt());
+  const extensionInstallation = () => app.isPackaged
+    ? prepareExtensionInstallation(path.join(process.resourcesPath, 'chrome-extension'), path.join(app.getPath('userData'), 'extensions', 'chrome-extension'))
+    : prepareExtensionInstallation(path.join(app.getAppPath(), 'chrome-extension'));
+  handle('coupang-collector:installation', undefined, extensionInstallation);
+  handle('coupang-collector:open-folder', undefined, async () => {
+    const installation = await extensionInstallation();
+    const error = await shell.openPath(installation.directory);
+    if (error) throw new Error('폴더를 열지 못했습니다. 표시된 경로를 복사해서 직접 열어 주세요.');
+    return installation;
+  });
   handle('coupang-collector:open-store', undefined, async () => {
     const status=deps.coupangCollector.status();
     await shell.openExternal(status.webStoreUrl);

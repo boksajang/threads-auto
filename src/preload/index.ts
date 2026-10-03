@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import type { AccountSaveInput, AppSettings, AutomationScheduleMutationResult, CodexUsageStatus, CommentRecord, CommentSummary, CoupangProductQueueItem, CoupangProductQueueSummary, DashboardActivitySnapshot, JobActivity, JobRecord, CredentialKey, PerformanceReport, PipelineRunView, PostRecord, ProviderConfig, SourceCandidate, SourceType, ThreadsIntegrationRun, ThreadsTokenStatus, UserLog } from '../shared/domain';
-import type { CoupangCollectorStatus } from '../shared/coupang-collector';
+import type { CoupangCollectorStatus, ExtensionInstallation } from '../shared/coupang-collector';
 import type { CoupangProductSearchSettings } from '../shared/coupang-catalog';
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -50,6 +50,8 @@ const api = {
     summary: (accountId: string) => ipcRenderer.invoke('naver-brand-queue:summary', accountId) as Promise<CoupangProductQueueSummary>,
   },
   coupangCollector: {
+    installation: () => ipcRenderer.invoke('coupang-collector:installation') as Promise<ExtensionInstallation>,
+    openFolder: () => ipcRenderer.invoke('coupang-collector:open-folder') as Promise<ExtensionInstallation>,
     status: () => ipcRenderer.invoke('coupang-collector:status') as Promise<CoupangCollectorStatus>,
     acknowledgePrompt: () => ipcRenderer.invoke('coupang-collector:acknowledge-prompt') as Promise<CoupangCollectorStatus>,
     openStore: () => ipcRenderer.invoke('coupang-collector:open-store') as Promise<CoupangCollectorStatus>,

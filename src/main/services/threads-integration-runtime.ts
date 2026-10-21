@@ -38,7 +38,15 @@ export class ThreadsIntegrationRuntime {
     private readonly assertIdle: (accountId: string) => void,
   ) {
     this.service = new ThreadsIntegrationService({
-      provider,
+      provider:{
+        ownPosts:(...args)=>provider.ownPosts(...args),
+        getPost:(...args)=>provider.getPost(...args),
+        publish:(...args)=>{this.assertCommentsEnabled(args[0]);return provider.publish(...args);},
+        replies:(...args)=>provider.replies(...args),
+        conversation:(...args)=>provider.conversation(...args),
+        reply:(...args)=>{this.assertCommentsEnabled(args[0]);return provider.reply(...args);},
+        deletePost:(...args)=>provider.deletePost(...args),
+      },
       supplyDailyDraft:async ({ accountId, runId, maxBodyLength }) => {
         const account=this.account(accountId);
         const previewAccount:Account={...account,dailyEnabled:true,promotionEnabled:false,automationTarget:false};
@@ -57,6 +65,10 @@ export class ThreadsIntegrationRuntime {
       isNotFound:isThreadsRemoteObjectMissing,
       isUncertain:(error) => error instanceof UncertainRemoteOperationError,
     });
+  }
+
+  private assertCommentsEnabled(accountId:string):void {
+    if(!this.repositories.getAccount(accountId)?.commentsEnabled)throw new Error('이 계정의 자동 댓글이 꺼져 실제 댓글 테스트를 실행하지 않습니다.');
   }
 
   private account(accountId:string):Account & { threadsUserId:string } {
@@ -88,6 +100,7 @@ export class ThreadsIntegrationRuntime {
   }
 
   async start(accountId:string):Promise<ThreadsIntegrationRun> {
+    this.assertCommentsEnabled(accountId);
     this.assertIdle(accountId);
     const account=this.account(accountId);
     const result=await this.service.run({accountId,threadsUserId:account.threadsUserId});

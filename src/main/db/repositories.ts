@@ -81,6 +81,7 @@ function accountFromRow(row: any): Account {
     operationStart: row.operation_start,
     operationEnd: row.operation_end,
     weekdays: json(row.weekdays_json, [0, 1, 2, 3, 4, 5, 6]),
+    commentsEnabled: bool(row.comments_enabled),
     commentIntervalMinutes: row.comment_interval_minutes,
     fixedLinkEnabled: bool(row.fixed_link_enabled),
     fixedLinkUrl: row.fixed_link_url,
@@ -327,11 +328,11 @@ export class Repositories {
       INSERT INTO accounts (
         id,threads_user_id,name,threads_handle,topic,personality,tone,audience,forbidden_topics,forbidden_expressions,
         daily_enabled,promotion_enabled,automation_target,active,daily_ratio,promotion_ratio,daily_post_target,
-        operation_start,operation_end,weekdays_json,comment_interval_minutes,fixed_link_enabled,fixed_link_url,created_at,updated_at
+        operation_start,operation_end,weekdays_json,comments_enabled,comment_interval_minutes,fixed_link_enabled,fixed_link_url,created_at,updated_at
       ) VALUES (
         @id,@threadsUserId,@name,@threadsHandle,@topic,@personality,@tone,@audience,@forbiddenTopics,@forbiddenExpressions,
         @dailyEnabled,@promotionEnabled,@automationTarget,@active,@dailyRatio,@promotionRatio,@dailyPostTarget,
-        @operationStart,@operationEnd,@weekdays,@commentIntervalMinutes,@fixedLinkEnabled,@fixedLinkUrl,@createdAt,@updatedAt
+        @operationStart,@operationEnd,@weekdays,@commentsEnabled,@commentIntervalMinutes,@fixedLinkEnabled,@fixedLinkUrl,@createdAt,@updatedAt
       ) ON CONFLICT(id) DO UPDATE SET
         name=excluded.name, threads_handle=excluded.threads_handle, topic=excluded.topic,
         personality=excluded.personality, tone=excluded.tone, audience=excluded.audience,
@@ -341,18 +342,19 @@ export class Repositories {
         daily_ratio=excluded.daily_ratio, promotion_ratio=excluded.promotion_ratio,
         daily_post_target=excluded.daily_post_target, operation_start=excluded.operation_start,
         operation_end=excluded.operation_end, weekdays_json=excluded.weekdays_json,
-        comment_interval_minutes=excluded.comment_interval_minutes,
+        comments_enabled=excluded.comments_enabled, comment_interval_minutes=excluded.comment_interval_minutes,
         fixed_link_enabled=excluded.fixed_link_enabled, fixed_link_url=excluded.fixed_link_url,
         updated_at=excluded.updated_at
     `).run({
       ...input,
       id,
       threadsUserId: input.threadsUserId ?? existing?.threadsUserId ?? null,
-      dailyEnabled: Number(input.dailyEnabled), promotionEnabled: Number(input.promotionEnabled),
+      commentsEnabled:Number(input.commentsEnabled ?? true), dailyEnabled: Number(input.dailyEnabled), promotionEnabled: Number(input.promotionEnabled),
       automationTarget: Number(input.automationTarget), active: Number(input.active),
       fixedLinkEnabled: Number(input.fixedLinkEnabled), weekdays: JSON.stringify(input.weekdays),
       createdAt: existing?.createdAt ?? now, updatedAt: now,
     });
+    if(input.commentsEnabled===false)this.cancelPendingCommentJobs(id);
     return this.getAccount(id)!;
   }
 
@@ -1023,6 +1025,11 @@ export class Repositories {
   cancelJob(id: string): boolean {
     return this.db.raw.prepare("UPDATE jobs SET status='CANCELLED',last_error='사용자가 예정 Job을 취소했습니다.',updated_at=? WHERE id=? AND status='PENDING'")
       .run(new Date().toISOString(), id).changes === 1;
+  }
+
+  cancelPendingCommentJobs(accountId:string):number {
+    return this.db.raw.prepare("UPDATE jobs SET status='CANCELLED',last_error='계정 자동 댓글 중지',updated_at=? WHERE account_id=? AND kind='COMMENTS' AND status='PENDING'")
+      .run(new Date().toISOString(),accountId).changes;
   }
 
   cancelAllActiveWork(): { jobs:number; pipelineRuns:number } {

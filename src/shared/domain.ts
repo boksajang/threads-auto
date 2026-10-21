@@ -80,6 +80,7 @@ export interface Account {
   operationStart: string;
   operationEnd: string;
   weekdays: number[];
+  commentsEnabled: boolean;
   commentIntervalMinutes: number;
   fixedLinkEnabled: boolean;
   fixedLinkUrl: string;

@@ -966,3 +966,11 @@ main { grid-column: 2; grid-row: 2; }
 }
 
 :root[data-platform="darwin"] .titlebar { padding-left: 88px; padding-right: 15px; }
+
+.comment-settings-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:22px; }
+.comment-enable-switch { flex-shrink:0; margin:0; color:var(--text); }
+.comment-enable-switch > span:first-child { min-width:48px; text-align:right; }
+.comment-settings > small { color:var(--muted); font-size:11px; line-height:1.5; }
+.comment-settings select:disabled { opacity:.5; cursor:not-allowed; }
+
+.form-grid > .field > span:first-child { display:flex; align-items:center; min-height:22px; }

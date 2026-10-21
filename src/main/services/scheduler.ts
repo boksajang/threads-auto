@@ -148,8 +148,11 @@ export class AutomationScheduler {
     const nowMs=now.getTime();
     let next=Math.floor(nowMs/HOUR_MS+1)*HOUR_MS;
     for(const account of this.recurringAccounts){
-      const commentIntervalMs=Math.max(1,account.commentIntervalMinutes)*60_000;
-      next=Math.min(next,Math.floor(nowMs/commentIntervalMs+1)*commentIntervalMs);
+      const current=this.repositories.getAccount(account.id);
+      if(current?.commentsEnabled){
+        const commentIntervalMs=Math.max(1,current.commentIntervalMinutes)*60_000;
+        next=Math.min(next,Math.floor(nowMs/commentIntervalMs+1)*commentIntervalMs);
+      }
       const coupang=this.repositories.listProviderConfigs(account.id)
         .find((config)=>config.type==='COUPANG'&&config.enabled);
       if(typeof coupang?.config.apiVerifiedAt==='string'&&coupang.config.apiVerifiedAt){
@@ -208,6 +211,11 @@ export class AutomationScheduler {
     const result=await this.rebuildSchedules(now,{reviveUserCancelledPublish:true});
     if(!this.running)this.start();
     return result;
+  }
+
+  refreshCommentSettings(accountId:string):void {
+    this.repositories.cancelPendingCommentJobs(accountId);
+    if(this.running)this.armNextWake();
   }
 
   async stopAndClearSchedules():Promise<number> {
@@ -360,8 +368,11 @@ export class AutomationScheduler {
       },{reviveUserCancelledPublish:options.reviveUserCancelledPublish}))scheduled+=1;
     }
     for (const account of eligibleAccounts) {
-      const commentSlot = Math.floor(now.getTime() / (account.commentIntervalMinutes * 60_000));
-      if(this.repositories.enqueueJob({ id: `comments:${account.id}:${commentSlot}`, accountId: account.id, kind: 'COMMENTS', runAt: now.toISOString(), payload: {} }))scheduled+=1;
+      const commentAccount=this.repositories.getAccount(account.id);
+      if(commentAccount?.commentsEnabled){
+        const commentSlot = Math.floor(now.getTime() / (commentAccount.commentIntervalMinutes * 60_000));
+        if(this.repositories.enqueueJob({ id: `comments:${account.id}:${commentSlot}`, accountId: account.id, kind: 'COMMENTS', runAt: now.toISOString(), payload: {} }))scheduled+=1;
+      }
       const insightSlot = now.toISOString().slice(0, 13);
       if(this.repositories.enqueueJob({ id: `insights:${account.id}:${insightSlot}`, accountId: account.id, kind: 'INSIGHTS', runAt: now.toISOString(), payload: {} }))scheduled+=1;
       const coupang = this.repositories.listProviderConfigs(account.id)
@@ -379,6 +390,11 @@ export class AutomationScheduler {
       this.repositories.completeJob(job.id, 'DONE');
       this.emitActivity(job, 'CANCELLED', '자동화 대상에서 제외되어 작업을 건너뛰었습니다.');
       this.repositories.addLog('INFO', 'JOB', '실행 직전 자동화 대상에서 제외되어 Job을 건너뛰었습니다.', undefined, job.accountId);
+      return;
+    }
+    if(job.kind==='COMMENTS'&&!account.commentsEnabled){
+      this.repositories.completeJob(job.id,'CANCELLED','계정 자동 댓글 중지');
+      this.emitActivity(job,'CANCELLED','이 계정의 자동 댓글이 꺼져 작업을 취소했습니다.');
       return;
     }
     if (job.kind !== 'COUPANG_REPORT' && !await this.eligibility.hasThreadsToken(account.id)) {
@@ -403,6 +419,11 @@ export class AutomationScheduler {
       this.repositories.completeJob(job.id, 'DONE');
       this.emitActivity(job, 'DONE', '작업을 완료했습니다.');
     } catch (error) {
+      if(job.kind==='COMMENTS'&&!this.repositories.getAccount(job.accountId)?.commentsEnabled){
+        this.repositories.completeJob(job.id,'CANCELLED','계정 자동 댓글 중지');
+        this.emitActivity(job,'CANCELLED','이 계정의 자동 댓글을 중지했습니다.');
+        return;
+      }
       const message = error instanceof Error ? error.message : String(error);
       const retryable = isRetryableJobError(error);
       if (job.attempt < POLICY.jobMaxAttempts && retryable) {

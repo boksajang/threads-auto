@@ -10,7 +10,7 @@ const accountInputShape = {
   forbiddenTopics: z.string().max(2000), forbiddenExpressions: z.string().max(2000), dailyEnabled: z.boolean(), promotionEnabled: z.boolean(),
   automationTarget: z.boolean(), active: z.boolean(), dailyRatio: z.number().int().min(0).max(100), promotionRatio: z.number().int().min(0).max(100),
   dailyPostTarget: z.number().int().min(1).max(50), operationStart: z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/), operationEnd: z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/),
-  weekdays: z.array(z.number().int().min(0).max(6)).min(1).max(7), commentIntervalMinutes: z.number().int().min(5).max(1440),
+  weekdays: z.array(z.number().int().min(0).max(6)).min(1).max(7), commentsEnabled: z.boolean().default(true), commentIntervalMinutes: z.number().int().min(5).max(1440),
   fixedLinkEnabled: z.boolean(), fixedLinkUrl: z.union([z.literal(''), z.string().url().refine((value) => value.startsWith('https://'), 'HTTPS URL만 허용됩니다.')]),
 };
 const hasContentMode = <T extends { dailyEnabled: boolean; promotionEnabled: boolean }>(value: T) => value.dailyEnabled || value.promotionEnabled;

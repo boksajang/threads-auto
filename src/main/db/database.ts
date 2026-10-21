@@ -319,6 +319,7 @@ const migrations = [
     ON affiliate_performance_by_key(credential_fingerprint,performance_date);
   `,
   `ALTER TABLE accounts ADD COLUMN threads_token_check_failed_at TEXT;`,
+  `ALTER TABLE accounts ADD COLUMN comments_enabled INTEGER NOT NULL DEFAULT 1 CHECK(comments_enabled IN (0,1));`,
 ];
 
 export class AppDatabase {

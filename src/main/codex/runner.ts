@@ -51,6 +51,7 @@ export interface AgentInvocation {
   prompt: string;
   settings: CodexSettings;
   webSearch?: boolean;
+  signal?: AbortSignal;
 }
 
 export interface AgentInvocationResult {
@@ -116,7 +117,9 @@ export class CodexRunner {
   }
 
   async run(invocation: AgentInvocation): Promise<AgentInvocationResult> {
+    invocation.signal?.throwIfAborted();
     const executable = await this.executablePath();
+    invocation.signal?.throwIfAborted();
     const args = [
       ...(invocation.webSearch ? ['--search'] : []), 'exec', '--json', '--ephemeral', '--ignore-user-config', '--ignore-rules',
       '--sandbox', 'read-only', '--skip-git-repo-check',
@@ -139,9 +142,13 @@ export class CodexRunner {
       let settled = false;
 
       const finishError = (error: Error, kill = false) => {
-        if (!settled) { settled = true; clearTimeout(timer); if (kill) this.killChild(child); else this.activeChildren.delete(child); reject(error); }
+        if (!settled) { settled = true; clearTimeout(timer); invocation.signal?.removeEventListener('abort',onAbort); if (kill) this.killChild(child); else this.activeChildren.delete(child); reject(error); }
       };
       const timer = setTimeout(() => finishError(new Error('Codex Agent 실행 시간이 초과되었습니다.'), true), invocation.settings.timeoutSeconds * 1000);
+
+      const onAbort=()=>finishError(new Error('자동 댓글 작업을 중지했습니다.'),true);
+      invocation.signal?.addEventListener('abort',onAbort,{once:true});
+      if(invocation.signal?.aborted){onAbort();return;}
 
       const parseLine = (line: string) => {
         if (!line.trim()) return;
@@ -169,6 +176,7 @@ export class CodexRunner {
       child.stderr.on('data', (chunk: Buffer) => { stderr = (stderr + chunk.toString('utf8')).slice(-32_000); });
       child.on('error', (error) => finishError(new Error(`Codex 실행 실패: ${error.message}`)));
       child.on('close', (code) => {
+        invocation.signal?.removeEventListener('abort',onAbort);
         clearTimeout(timer);
         this.activeChildren.delete(child);
         if (settled) return;

@@ -40,7 +40,7 @@ const accountCredentialKeys = (accountId: string): CredentialKey[] => [
   `youtubeApiKey:${accountId}`, `coupangAccessKey:${accountId}`, `coupangSecretKey:${accountId}`,
 ];
 
-const scheduleFields = ['automationTarget','active','dailyEnabled','promotionEnabled','dailyRatio','promotionRatio','dailyPostTarget','commentIntervalMinutes','operationStart','operationEnd','weekdays'] as const;
+const scheduleFields = ['automationTarget','active','dailyEnabled','promotionEnabled','dailyRatio','promotionRatio','dailyPostTarget','operationStart','operationEnd','weekdays'] as const;
 
 function trusted(event: IpcMainInvokeEvent, window: BrowserWindow): void {
   if (event.senderFrame !== window.webContents.mainFrame) throw new Error('허용되지 않은 IPC 호출입니다.');
@@ -250,6 +250,10 @@ export function registerIpc(deps: Dependencies): void {
     const previous=deps.repositories.getAccount(normalizedAccountInput.id);
     const saved=deps.repositories.saveAccount(normalizedAccountInput);
     const scheduleChanged=!previous||scheduleFields.some((key)=>JSON.stringify(previous[key])!==JSON.stringify(saved[key]));
+    if(previous&&(previous.commentsEnabled!==saved.commentsEnabled||previous.commentIntervalMinutes!==saved.commentIntervalMinutes)){
+      deps.pipeline.stopComments(saved.id);
+      deps.scheduler.refreshCommentSettings(saved.id);
+    }
     if(scheduleChanged){
       const currentSettings=await deps.settings.read();
       if(currentSettings.schedulerEnabled)await deps.settings.save({...currentSettings,schedulerEnabled:false});
